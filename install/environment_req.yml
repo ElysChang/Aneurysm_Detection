@@ -1,0 +1,26 @@
+
+# # Create environment without SimpleITK first
+
+# conda init powershell
+# Restart your terminal after this
+
+# conda create -n aneurysm_inference python=3.8 pip -y
+# conda activate aneurysm_inference
+
+# conda env list (make sure that  there is a * next to aneurysm_inference)
+
+# # Now install packages one by one to control the order
+# pip install tensorflow==2.4.1
+# pip install nibabel==3.2.1
+# pip install pandas==1.1.5
+# pip install scipy==1.5.4
+# pip install scikit-image==0.17.2
+# pip install numpy==1.19.2
+# pip install joblib==1.0.1
+# pip install --no-deps SimpleITK==2.0.2
+# pip install matplotlib==3.2.2
+# pip install antspyx==0.4.2
+# pip install connected-components-3d==3.10.2
+# pip install opencv-python==4.5.1.48
+
+# Run with python inference/patient_wise_sliding_window.py --config inference/config_inference.json

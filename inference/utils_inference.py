@@ -25,6 +25,7 @@ import shutil
 import pickle
 import argparse
 import json
+from tqdm import tqdm
 from typing import Tuple, Any
 from dataset_creation.utils_dataset_creation import extract_thresholds_of_intensity_criteria, extract_lesion_info,\
     resample_volume, print_running_time, patch_overlaps_with_aneurysm, create_dir_if_not_exist
@@ -900,6 +901,20 @@ def create_output_folder(batched_ds: tf.data.Dataset,
         unet_batch_size: batch size. Not really relevant (cause we're doing inference), but still needed
     """
     # start_out_dir = time.time()
+    print("\nStarting prediction phase...")
+    
+    # Process predictions in smaller batches
+    batch_size = 32
+    total_patches = sum(1 for _ in batched_ds)
+    pbar = tqdm(total=total_patches, desc="Predicting patches")
+    
+    segm_map = np.zeros(resampled_nii_volume_after_bet.shape, dtype=np.float32)
+    overlap_map = np.zeros(segm_map.shape, dtype=np.float32)
+    
+    for batch in batched_ds.as_numpy_iterator():
+        pred_patches = unet.predict(batch, batch_size=batch_size, verbose=0)
+        # Update progress
+        pbar.update(len(batch))
 
     create_dir_if_not_exist(output_folder_path_)  # if output path does not exist, create it
 
@@ -991,6 +1006,9 @@ def create_output_folder(batched_ds: tf.data.Dataset,
                                              txt_file_path, original_bet_bfc_angio, remove_dark_fp, reduce_fp, max_fp, dark_fp_threshold)
     else:
         raise ValueError(f"Unexpected value for len(patch_center_coords): {len(patch_center_coords)}")
+    
+    pbar.close()
+    print("Saving results...")
 
 
 def check_registration_quality(quality_metrics_thresholds: dict,
